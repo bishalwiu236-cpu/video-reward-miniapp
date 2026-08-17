@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>VideoReward Official</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#07111f; --surface:#0e1a2c; --surface2:#13233a; --line:#ffffff12;
+  --text:#f7f9ff; --muted:#8f9db4; --blue:#347cff; --blue2:#6a4df5;
+  --green:#26d58a; --danger:#ff6377; --shadow:0 18px 50px #0005;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.5}
+.app-shell{width:min(520px,100%);min-height:100vh;margin:auto;padding-bottom:92px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(7,17,31,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:linear-gradient(135deg,#5032ee,#1d80ff);box-shadow:0 8px 24px #246fff33}
+.brand strong{display:block;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand span{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.icon-btn{border:0;background:#ffffff0b;color:#fff;width:40px;height:40px;border-radius:12px}
+.screen{padding:16px}
+.hero{padding:22px;border-radius:24px;background:linear-gradient(135deg,#4927cf,#126fe2);box-shadow:var(--shadow)}
+.eyebrow{font-size:11px;letter-spacing:1.4px;opacity:.8}
+.hero h1{font-size:29px;line-height:1.13;margin:9px 0}
+.hero p{margin:0;color:#e4ebff}
+.hero-row{display:flex;gap:10px;margin-top:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:17px;margin-top:12px}
+.balance-label,.muted{color:var(--muted);font-size:12px}
+.balance{font-size:40px;font-weight:850;letter-spacing:-1px;margin:2px 0}
+.unit{color:var(--muted);font-size:11px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:#ffffff08;border-radius:13px;padding:11px}
+.stat b{display:block;font-size:16px}
+.stat span{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tile{border:1px solid var(--line);background:var(--surface);color:#fff;text-align:left;padding:17px;border-radius:18px;min-height:104px}
+.tile .tile-icon{font-size:25px}
+.tile strong{display:block;font-size:15px;margin-top:8px}
+.tile small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.primary,.secondary,.danger{border:0;border-radius:12px;padding:11px 15px;font-weight:750}
+.primary{background:var(--blue);color:#fff}
+.secondary{background:#ffffff10;color:#fff;border:1px solid var(--line)}
+.danger{background:#ff63771a;color:#ff9eaa;border:1px solid #ff637733}
+.full{width:100%}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:4px 0 12px}
+.section-head h2{margin:0;font-size:22px}
+.back{border:0;background:transparent;color:#b7c6df;padding:0;margin-bottom:12px}
+.task{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:13px;margin:9px 0}
+.task-icon{width:44px;height:44px;border-radius:13px;background:#ffffff08;display:grid;place-items:center;font-size:23px}
+.task-info{flex:1;min-width:0}
+.task-info strong{display:block;font-size:14px}
+.task-info small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.reward-pill{color:#72e8b3;font-weight:800;font-size:12px;margin-top:4px;display:block}
+.list-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.list-row:last-child{border-bottom:0}
+.list-icon{font-size:22px}
+.list-row .grow{flex:1}
+.progress{height:8px;border-radius:99px;background:#ffffff0c;overflow:hidden;margin:10px 0}
+.progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),#7d5cff);border-radius:inherit}
+.ref-link{display:flex;gap:8px}
+.ref-link input,.field input{flex:1;min-width:0;width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#091424;color:#fff;outline:none}
+.field{margin-top:12px}
+.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+.profile-head{display:flex;align-items:center;gap:14px}
+.avatar{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,#5032ee,#1d80ff);font-size:27px;font-weight:800}
+.profile-head h2{margin:0;font-size:21px}
+.profile-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.notice{padding:12px;border-radius:14px;background:#347cff14;border:1px solid #347cff2b;color:#bfd4ff;font-size:12px;line-height:1.5}
+.empty{text-align:center;color:var(--muted);padding:32px 12px}
+.bottom-nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,100%);z-index:30;display:grid;grid-template-columns:repeat(5,1fr);padding:8px 5px calc(8px + env(safe-area-inset-bottom));background:rgba(7,17,31,.98);border-top:1px solid var(--line)}
+.bottom-nav button{border:0;background:transparent;color:#8d9ab0;padding:6px 2px;font-size:19px}
+.bottom-nav button.active{color:#fff}
+.bottom-nav span{display:block;font-size:9px;margin-top:3px}
+.toast{position:fixed;z-index:80;left:50%;bottom:96px;transform:translate(-50%,20px);background:#fff;color:#07111f;padding:11px 16px;border-radius:14px;font-weight:750;opacity:0;pointer-events:none;transition:.2s;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;z-index:70;background:#0009;display:grid;place-items:end center;padding:14px}
+.modal.hidden{display:none}
+.modal-card{width:min(520px,100%);background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:17px;box-shadow:var(--shadow)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+@media(max-width:370px){.brand strong{font-size:15px}.hero h1{font-size:25px}.tile{padding:14px}.bottom-nav span{font-size:8px}}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo">🎬</div>
+      <div>
+        <strong>VideoReward Official</strong>
+        <span>Earn • Tasks • Rewards</span>
+      </div>
+    </div>
+    <button class="icon-btn" data-action="profile" aria-label="Profile">👤</button>
+  </header>
+
+  <main id="app" class="screen" aria-live="polite"></main>
+
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <button data-tab="home">🏠<span>Home</span></button>
+    <button data-tab="tasks">🎬<span>Tasks</span></button>
+    <button data-tab="rewards">🎁<span>Rewards</span></button>
+    <button data-tab="referral">👥<span>Referral</span></button>
+    <button data-tab="profile">👤<span>Profile</span></button>
+  </nav>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-head">
+        <strong id="modal-title">Confirm</strong>
+        <button class="icon-btn" data-action="close-modal">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Self-contained VideoReward Mini App build
+// Frontend configuration.
+// Leave API_BASE_URL empty while using the built-in demo mode.
+// In production, set this to your HTTPS backend URL.
+const CONFIG = {
+  API_BASE_URL: "",
+  BOT_USERNAME: "VideoReward_Bot",
+  CURRENCY_NAME: "POINTS",
+  DAILY_CLAIM_AMOUNT: 10
+};
+
+// Telegram Mini App helpers.
+// IMPORTANT: initDataUnsafe is convenient for display only.
+// Your backend must validate Telegram.WebApp.initData before trusting identity.
+function getTelegramWebApp() {
+  return window.Telegram?.WebApp ?? null;
+}
+
+function initTelegram() {
+  const tg = getTelegramWebApp();
+  if (!tg) return null;
+  try {
+    tg.ready();
+    tg.expand();
+    tg.enableClosingConfirmation?.();
+    return tg;
+  } catch {
+    return tg;
+  }
+}
+
+function getTelegramUser() {
+  const tg = getTelegramWebApp();
+  return tg?.initDataUnsafe?.user ?? null;
+}
+
+function getInitData() {
+  return getTelegramWebApp()?.initData ?? "";
+}
+
+function haptic(type = "light") {
+  try {
+    getTelegramWebApp()?.HapticFeedback?.impactOccurred(type);
+  } catch {}
+}
+
+function shareUrl(url, text = "") {
+  const tg = getTelegramWebApp();
+  if (tg?.openTelegramLink) {
+    const share = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+    tg.openTelegramLink(share);
+    return true;
+  }
+  return false;
+}
+
+
+const demoKey = "videoreward-demo-state-v2";
+
+const demoTasks = [
+  {id:"video-1", icon:"🎬", title:"Watch Video", description:"Watch the assigned video", reward:5, completed:false},
+  {id:"video-2", icon:"📺", title:"Daily Video", description:"Complete today's video", reward:3, completed:false},
+  {id:"task-1", icon:"📝", title:"Simple Task", description:"Finish a quick task", reward:7, completed:false},
+  {id:"join-1", icon:"📣", title:"Join Channel", description:"Join the official channel", reward:10, completed:false}
+];
+
+function loadDemo() {
+  try {
+    return JSON.parse(localStorage.getItem(demoKey)) || {
+      balance:0, earned:0, referrals:0, dailyClaimed:false, tasks:demoTasks
+    };
+  } catch {
+    return {balance:0, earned:0, referrals:0, dailyClaimed:false, tasks:demoTasks};
+  }
+}
+function saveDemo(s) {
+  localStorage.setItem(demoKey, JSON.stringify(s));
+  return s;
+}
+function demoUser() {
+  const u = getTelegramUser() || {};
+  return {
+    id: u.id || "demo-user",
+    first_name: u.first_name || "Telegram",
+    last_name: u.last_name || "User",
+    username: u.username || ""
+  };
+}
+
+async function request(path, options = {}) {
+  const headers = {"Content-Type":"application/json", ...(options.headers || {})};
+  const initData = getInitData();
+  if (initData) headers["X-Telegram-Init-Data"] = initData;
+  const response = await fetch(`${CONFIG.API_BASE_URL}${path}`, {...options, headers});
+  if (!response.ok) throw new Error(`API ${response.status}`);
+  return response.json();
+}
+
+async function getAppState() {
+  if (CONFIG.API_BASE_URL) return request("/api/me");
+  const s = loadDemo();
+  return {user:demoUser(), ...s};
+}
+
+async function getTasks() {
+  if (CONFIG.API_BASE_URL) return request("/api/tasks");
+  return loadDemo().tasks;
+}
+
+async function claimDaily() {
+  if (CONFIG.API_BASE_URL) return request("/api/claim-daily", {method:"POST"});
+  const s = loadDemo();
+  if (s.dailyClaimed) throw new Error("DAILY_ALREADY_CLAIMED");
+  s.dailyClaimed = true; s.balance += CONFIG.DAILY_CLAIM_AMOUNT; s.earned += CONFIG.DAILY_CLAIM_AMOUNT;
+  saveDemo(s);
+  return {balance:s.balance, earned:s.earned, dailyClaimed:s.dailyClaimed};
+}
+
+async function completeTask(taskId) {
+  if (CONFIG.API_BASE_URL) return request(`/api/tasks/${encodeURIComponent(taskId)}/complete`, {method:"POST"});
+  const s = loadDemo();
+  const task = s.tasks.find(t => t.id === taskId);
+  if (!task) throw new Error("TASK_NOT_FOUND");
+  if (task.completed) throw new Error("TASK_ALREADY_COMPLETED");
+  task.completed = true; s.balance += task.reward; s.earned += task.reward;
+  saveDemo(s);
+  return {balance:s.balance, earned:s.earned, tasks:s.tasks};
+}
+
+async function getReferral() {
+  if (CONFIG.API_BASE_URL) return request("/api/referral");
+  const s = loadDemo(), u = demoUser();
+  const link = `https://t.me/${CONFIG.BOT_USERNAME}?start=ref_${u.id}`;
+  return {referrals:s.referrals, earnings:0, link};
+}
+
+async function getRewards() {
+  if (CONFIG.API_BASE_URL) return request("/api/rewards");
+  const s = loadDemo();
+  return {balance:s.balance, earned:s.earned, history:[]};
+}
+
+async function submitWithdrawal(amount, account) {
+  if (CONFIG.API_BASE_URL) return request("/api/withdrawals", {
+    method:"POST", body:JSON.stringify({amount, account})
+  });
+  const s = loadDemo();
+  if (!amount || amount > s.balance) throw new Error("INSUFFICIENT_BALANCE");
+  // Demo mode does not deduct funds until a real backend accepts the request.
+  return {ok:true, status:"pending"};
+}
+
+
+const app = document.getElementById("app");
+const toastEl = document.getElementById("toast");
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+
+const state = {
+  tab: "home",
+  user: null,
+  balance: 0,
+  earned: 0,
+  referrals: 0,
+  dailyClaimed: false,
+  tasks: [],
+  rewardHistory: [],
+  referralLink: "",
+  loading: false
+};
+
+initTelegram();
+bindGlobalEvents();
+boot();
+
+function bindGlobalEvents() {
+  document.querySelectorAll("[data-tab]").forEach(btn => {
+    btn.addEventListener("click", () => navigate(btn.dataset.tab));
+  });
+  document.addEventListener("click", handleAction);
+  modal.addEventListener("click", e => {
+    if (e.target === modal) closeModal();
+  });
+}
+
+async function boot() {
+  await refresh();
+  navigate("home");
+}
+
+async function refresh() {
+  try {
+    state.loading = true;
+    const [me, tasks, referral, rewards] = await Promise.all([
+      getAppState(), getTasks(), getReferral(), getRewards()
+    ]);
+    Object.assign(state, {
+      user: me.user ?? getTelegramUser(),
+      balance: Number(me.balance || 0),
+      earned: Number(me.earned || 0),
+      referrals: Number(me.referrals ?? referral.referrals ?? 0),
+      dailyClaimed: Boolean(me.dailyClaimed),
+      tasks: tasks || [],
+      rewardHistory: rewards.history || [],
+      referralLink: referral.link || ""
+    });
+  } catch (e) {
+    notify("ডেটা লোড করা যায়নি — Demo mode/API সেটিংস দেখুন");
+  } finally {
+    state.loading = false;
+  }
+}
+
+function navigate(tab) {
+  state.tab = tab;
+  document.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function render() {
+  if (state.loading && !state.user) {
+    app.innerHTML = `<div class="card empty">Loading VideoReward…</div>`;
+    return;
+  }
+  const views = {home:homeView, tasks:tasksView, rewards:rewardsView, referral:referralView, profile:profileView};
+  app.innerHTML = views[state.tab]();
+}
+
+function homeView() {
+  const user = state.user || {};
+  const name = user.first_name || "বন্ধু";
+  return `
+    <section class="hero">
+      <div class="eyebrow">WELCOME BACK</div>
+      <h1>হ্যালো, ${escapeHtml(name)} 👋</h1>
+      <p>Tasks সম্পন্ন করুন, daily bonus নিন এবং points জমা করুন।</p>
+      <div class="hero-row">
+        <button class="primary" data-action="daily-claim" ${state.dailyClaimed ? "disabled":""}>
+          ${state.dailyClaimed ? "✅ Claimed Today" : "🎁 Claim +10"}
+        </button>
+        <button class="secondary" data-action="tab" data-value="tasks">🎬 View Tasks</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="balance-label">বর্তমান ব্যালেন্স</div>
+      <div class="balance">${format(state.balance)}</div>
+      <div class="unit">${CONFIG.CURRENCY_NAME}</div>
+      <div class="stats">
+        <div class="stat"><b>${format(state.earned)}</b><span>Total Earned</span></div>
+        <div class="stat"><b>${state.tasks.filter(t=>t.completed).length}</b><span>Tasks Done</span></div>
+        <div class="stat"><b>${state.referrals}</b><span>Referrals</span></div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <button class="tile" data-action="tab" data-value="tasks"><span class="tile-icon">🎬</span><strong>Tasks</strong><small>Available earning tasks</small></button>
+      <button class="tile" data-action="tab" data-value="rewards"><span class="tile-icon">🎁</span><strong>Rewards</strong><small>Balance & withdrawal</small></button>
+      <button class="tile" data-action="tab" data-value="referral"><span class="tile-icon">👥</span><strong>Referral</strong><small>Invite friends & earn</small></button>
+      <button class="tile" data-action="profile"><span class="tile-icon">👤</span><strong>Profile</strong><small>Telegram account</small></button>
+    </div>
+
+    <section class="card">
+      <div class="section-head"><h2>Quick guide</h2></div>
+      <div class="list-row"><span class="list-icon">1️⃣</span><div class="grow"><b>Claim daily bonus</b><div class="muted">একবার করে daily bonus নিন</div></div></div>
+      <div class="list-row"><span class="list-icon">2️⃣</span><div class="grow"><b>Complete tasks</b><div class="muted">প্রতিটি task-এর নিয়ম মেনে reward নিন</div></div></div>
+      <div class="list-row"><span class="list-icon">3️⃣</span><div class="grow"><b>Invite friends</b><div class="muted">Referral থেকে extra earnings</div></div></div>
+    </section>
+  `;
+}
+
+function tasksView() {
+  if (!state.tasks.length) return `<section class="card empty">এখন কোনো task নেই।</section>`;
+  return `
+    <div class="section-head"><h2>🎬 Tasks</h2><span class="muted">${state.tasks.filter(t=>!t.completed).length} available</span></div>
+    <div class="notice">Task complete করার আগে প্রয়োজনীয় channel/link অবশ্যই follow করুন। Backend verification থাকলে সেটিই final status নির্ধারণ করবে।</div>
+    ${state.tasks.map(t => `
+      <div class="task">
+        <div class="task-icon">${t.icon || "🎯"}</div>
+        <div class="task-info">
+          <strong>${escapeHtml(t.title)}</strong>
+          <small>${escapeHtml(t.description || "")}</small>
+          <span class="reward-pill">+${format(t.reward)} ${CONFIG.CURRENCY_NAME}</span>
+        </div>
+        <button class="${t.completed ? "secondary":"primary"}" data-action="complete-task" data-id="${escapeAttr(t.id)}" ${t.completed?"disabled":""}>
+          ${t.completed ? "Done" : "Start"}
+        </button>
+      </div>
+    `).join("")}
+  `;
+}
+
+function rewardsView() {
+  return `
+    <div class="section-head"><h2>🎁 Rewards</h2></div>
+    <section class="card">
+      <div class="balance-label">Available Balance</div>
+      <div class="balance">${format(state.balance)}</div>
+      <div class="unit">${CONFIG.CURRENCY_NAME}</div>
+      <button class="primary full" style="margin-top:14px" data-action="withdraw-modal">💸 Withdraw</button>
+    </section>
+    <section class="card">
+      <div class="section-head"><h3 style="margin:0">Earnings summary</h3></div>
+      <div class="list-row"><span class="list-icon">🎁</span><div class="grow"><b>Daily bonus</b><div class="muted">+${CONFIG.DAILY_CLAIM_AMOUNT} ${CONFIG.CURRENCY_NAME} per day</div></div><b>${state.dailyClaimed ? "Claimed":"Available"}</b></div>
+      <div class="list-row"><span class="list-icon">🎬</span><div class="grow"><b>Task earnings</b><div class="muted">All completed task rewards</div></div><b>${format(state.earned)}</b></div>
+    </section>
+    <section class="card">
+      <h3 style="margin-top:0">Recent withdrawals</h3>
+      ${state.rewardHistory.length ? state.rewardHistory.map(x=>`<div class="list-row"><span class="grow">${escapeHtml(x.status || "Pending")}</span><b>${format(x.amount)}</b></div>`).join("") : `<div class="empty">No withdrawal history yet.</div>`}
+    </section>
+  `;
+}
+
+function referralView() {
+  const count = state.referrals;
+  const target = 10;
+  const pct = Math.min(100, Math.round((count/target)*100));
+  return `
+    <div class="section-head"><h2>👥 Referral</h2></div>
+    <section class="card">
+      <div class="balance">${count}</div>
+      <div class="balance-label">Successful referrals</div>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+      <div class="muted">${count}/${target} referrals to your next milestone</div>
+    </section>
+    <section class="card">
+      <h3 style="margin-top:0">Your referral link</h3>
+      <div class="ref-link">
+        <input id="ref-link" value="${escapeAttr(state.referralLink)}" readonly>
+        <button class="primary" data-action="copy-ref">Copy</button>
+      </div>
+      <button class="secondary full" style="margin-top:10px" data-action="share-ref">📤 Share with friends</button>
+    </section>
+    <section class="card">
+      <div class="list-row"><span class="list-icon">💰</span><div class="grow"><b>Referral earnings</b><div class="muted">Backend will return the verified amount</div></div><b>—</b></div>
+      <div class="list-row"><span class="list-icon">🔒</span><div class="grow"><b>Fraud protection</b><div class="muted">Referral rewards should be verified server-side</div></div></div>
+    </section>
+  `;
+}
+
+function profileView() {
+  const u = state.user || {};
+  const full = [u.first_name,u.last_name].filter(Boolean).join(" ") || "Telegram User";
+  const initials = (u.first_name || "U").slice(0,1).toUpperCase();
+  return `
+    <div class="section-head"><h2>👤 Profile</h2></div>
+    <section class="card">
+      <div class="profile-head">
+        <div class="avatar">${escapeHtml(initials)}</div>
+        <div><h2>${escapeHtml(full)}</h2><p>${u.username ? "@"+escapeHtml(u.username) : "Username not available"}</p></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="list-row"><span class="list-icon">🆔</span><div class="grow"><div class="muted">Telegram ID</div><b>${escapeHtml(String(u.id || "—"))}</b></div></div>
+      <div class="list-row"><span class="list-icon">💰</span><div class="grow"><div class="muted">Balance</div><b>${format(state.balance)} ${CONFIG.CURRENCY_NAME}</b></div></div>
+      <div class="list-row"><span class="list-icon">📈</span><div class="grow"><div class="muted">Total earned</div><b>${format(state.earned)} ${CONFIG.CURRENCY_NAME}</b></div></div>
+    </section>
+    <section class="card">
+      <div class="notice">Production integration: Telegram identity, balance, task completion and withdrawals must be validated by your backend. Never trust client-side balance values.</div>
+    </section>
+  `;
+}
+
+async function handleAction(e) {
+  const el = e.target.closest("[data-action]");
+  if (!el) return;
+  const action = el.dataset.action;
+  if (action === "tab") navigate(el.dataset.value);
+  if (action === "profile") navigate("profile");
+  if (action === "close-modal") closeModal();
+  if (action === "daily-claim") await onDailyClaim();
+  if (action === "complete-task") await onCompleteTask(el.dataset.id);
+  if (action === "copy-ref") await copyReferral();
+  if (action === "share-ref") shareReferral();
+  if (action === "withdraw-modal") openWithdraw();
+  if (action === "withdraw-submit") await onWithdraw();
+}
+
+async function onDailyClaim() {
+  if (state.dailyClaimed) return notify("আজকের bonus ইতিমধ্যে নেওয়া হয়েছে");
+  try {
+    const r = await claimDaily();
+    state.balance = Number(r.balance); state.earned = Number(r.earned); state.dailyClaimed = true;
+    haptic("medium"); notify(`🎁 +${CONFIG.DAILY_CLAIM_AMOUNT} points added`);
+    render();
+  } catch(e) {
+    notify(e.message === "DAILY_ALREADY_CLAIMED" ? "আজকের bonus ইতিমধ্যে নেওয়া হয়েছে" : "Claim failed");
+  }
+}
+
+async function onCompleteTask(id) {
+  try {
+    const r = await completeTask(id);
+    state.balance = Number(r.balance); state.earned = Number(r.earned);
+    if (r.tasks) state.tasks = r.tasks;
+    haptic("light"); notify("✅ Task completed");
+    render();
+  } catch(e) {
+    notify(e.message === "TASK_ALREADY_COMPLETED" ? "Task already completed" : "Task verification failed");
+  }
+}
+
+async function copyReferral() {
+  const input = document.getElementById("ref-link");
+  if (!input) return;
+  try {
+    await navigator.clipboard.writeText(input.value);
+    haptic("light"); notify("Referral link copied");
+  } catch {
+    input.select(); document.execCommand("copy"); notify("Referral link copied");
+  }
+}
+
+function shareReferral() {
+  const ok = shareUrl(state.referralLink, "Join VideoReward Official and earn rewards!");
+  if (!ok) copyReferral();
+}
+
+function openWithdraw() {
+  modalTitle.textContent = "💸 Withdraw";
+  modalBody.innerHTML = `
+    <div class="field"><label>Amount (${CONFIG.CURRENCY_NAME})</label><input id="withdraw-amount" type="number" min="1" max="${state.balance}" placeholder="Enter amount"></div>
+    <div class="field"><label>Payment account</label><input id="withdraw-account" placeholder="e.g. your payment account"></div>
+    <button class="primary full" style="margin-top:10px" data-action="withdraw-submit">Submit withdrawal</button>
+  `;
+  modal.classList.remove("hidden");
+}
+
+async function onWithdraw() {
+  const amount = Number(document.getElementById("withdraw-amount")?.value);
+  const account = document.getElementById("withdraw-account")?.value.trim();
+  if (!amount || amount <= 0) return notify("Valid amount দিন");
+  if (amount > state.balance) return notify("Insufficient balance");
+  if (!account) return notify("Payment account দিন");
+  try {
+    await submitWithdrawal(amount, account);
+    closeModal(); haptic("medium"); notify("Withdrawal request submitted");
+  } catch(e) {
+    notify(e.message === "INSUFFICIENT_BALANCE" ? "Insufficient balance" : "Withdrawal failed");
+  }
+}
+
+function closeModal(){modal.classList.add("hidden")}
+function notify(text){
+  toastEl.textContent = text; toastEl.classList.add("show");
+  clearTimeout(notify.timer); notify.timer = setTimeout(()=>toastEl.classList.remove("show"),1800);
+}
+function format(n){return Number(n||0).toLocaleString()}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escapeAttr(s){return escapeHtml(s)}
+
+</script>
+</body>
+</html>
