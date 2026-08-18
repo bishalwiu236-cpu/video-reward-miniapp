@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <title>VideoReward Official</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="./config.js"></script>
+  <style>
+    :root{--bg:#07111f;--surface:#0e1a2c;--surface2:#13233a;--line:#ffffff12;--text:#f7f9ff;--muted:#8f9db4;--blue:#347cff;--blue2:#6a4df5;--green:#26d58a;--danger:#ff6377}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}
+    .app{width:min(520px,100%);min-height:100vh;margin:auto;padding-bottom:92px}
+    header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:rgba(7,17,31,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+    .brand{display:flex;align-items:center;gap:10px}.brand-logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:linear-gradient(135deg,#5032ee,#347cff)}
+    .brand strong{display:block;font-size:18px}.brand small{display:block;color:var(--muted);margin-top:2px}
+    main{padding:16px}.hero{padding:22px;border-radius:24px;background:linear-gradient(135deg,#4927cf,#126fe2);box-shadow:0 12px 26px #0005}
+    .eyebrow{font-size:11px;letter-spacing:1.4px;opacity:.8}.hero h1{margin:9px 0;font-size:30px;line-height:1.15}.hero p{margin:0;color:#eef4ff;font-size:16px}
+    .row{display:flex;gap:10px;margin-top:18px}.btn{border:1px solid #ffffff22;border-radius:16px;padding:13px 16px;color:#fff;background:#ffffff12;font-weight:700}.btn.primary{background:#3184ff;border-color:#3184ff}.btn.full{width:100%}
+    .card{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:18px}.label{color:var(--muted);font-size:13px}.balance{font-size:44px;font-weight:800;margin:10px 0}.unit{color:var(--muted);font-size:12px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.stat{background:#ffffff06;border-radius:14px;padding:12px}.stat b{display:block;font-size:17px}.stat span{color:var(--muted);font-size:11px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.tile{min-height:120px}.tile .icon{font-size:30px}.tile h3{margin:9px 0 4px}.tile p{margin:0;color:var(--muted);font-size:13px}
+    .task{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line)}.task:last-child{border-bottom:0}.task h4{margin:0 0 4px}.task p{margin:0;color:var(--muted);font-size:13px}
+    .amount{font-size:24px;font-weight:800}.muted{color:var(--muted)}.empty{padding:25px 0;text-align:center;color:var(--muted)}
+    nav{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,100%);display:grid;grid-template-columns:repeat(5,1fr);background:#081321f2;border-top:1px solid var(--line);padding:8px 0}
+    nav button{border:0;background:transparent;color:var(--muted);padding:6px 2px;font-size:11px}nav button.active{color:#fff}nav span{display:block;font-size:22px;margin-bottom:3px}
+    .modal{position:fixed;inset:0;background:#0009;display:grid;place-items:end;z-index:50}.sheet{width:min(520px,100%);background:var(--surface);border-radius:24px 24px 0 0;padding:20px}.hidden{display:none}
+    .field{margin:12px 0}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}.field input{width:100%;border:1px solid var(--line);background:#ffffff08;color:#fff;border-radius:12px;padding:10px;font-size:14px}
+    .notice{margin-top:12px;padding:12px;border-radius:12px;background:#ffffff08;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><div class="brand-logo">🎬</div><div><strong>VideoReward Official</strong><small>Earn • Tasks • Rewards</small></div></div>
+    <div id="status">•••</div>
+  </header>
+
+  <main id="view"></main>
+
+  <nav>
+    <button data-tab="home" class="active"><span>🏠</span>Home</button>
+    <button data-tab="tasks"><span>🎬</span>Tasks</button>
+    <button data-tab="rewards"><span>🎁</span>Rewards</button>
+    <button data-tab="referral"><span>👥</span>Referral</button>
+    <button data-tab="profile"><span>👤</span>Profile</button>
+  </nav>
+</div>
+
+<div id="modal" class="modal hidden"><div class="sheet"><div id="modalBody"></div></div></div>
+
+<script>
+// Referral links are generated from the authenticated Telegram user ID; no user ID is hard-coded.
+const tg = window.Telegram?.WebApp;
+const API = (window.APP_CONFIG?.API_BASE_URL || "").replace(/\/$/,"");
+let token = sessionStorage.getItem("vr_token") || "";
+let me = null;
+let tasks = [];
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function notify(msg){ if(tg?.showAlert) tg.showAlert(msg); else alert(msg); }
+function headers(){return token?{"Authorization":"Bearer "+token,"Content-Type":"application/json"}:{"Content-Type":"application/json"}}
+
+async function api(path, opts={}) {
+  const r=await fetch(API+path,{...opts,headers:{...headers(),...(opts.headers||{})}});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||"Request failed");
+  return data;
+}
+
+async function login(){
+  if(!API || API.includes("YOUR-BACKEND-DOMAIN")) throw new Error("আগে frontend/config.js-এ backend URL দিন");
+  const initData=tg?.initData || "";
+  if(!initData) throw new Error("Telegram Mini App-এর ভিতর থেকে খুলুন");
+  const data=await api("/api/auth/telegram",{method:"POST",body:JSON.stringify({initData})});
+  token=data.token; sessionStorage.setItem("vr_token",token); me=data.user;
+  document.getElementById("status").textContent="●";
+}
+async function loadMe(){me=(await api("/api/me")).user}
+async function loadTasks(){tasks=(await api("/api/tasks")).tasks}
+
+function home(){
+  const u=me;
+  return `<section class="hero"><div class="eyebrow">WELCOME BACK</div><h1>হ্যালো, ${esc(u.firstName||u.username||"বন্ধু")} 👋</h1><p>Tasks সম্পন্ন করুন এবং পয়েন্ট অর্জন করুন</p></section>
+  <section class="card"><div class="label">বর্তমান ব্যালেন্স</div><div class="balance">${Number(u.balance).toLocaleString()}</div><div class="unit">POINTS</div><div class="row"><button class="btn primary" onclick="claimDaily()">📅 Claim Daily Bonus</button></div></section>
+  <div class="grid"><div class="card tile" onclick="go('tasks')"><div class="icon">🎬</div><h3>Tasks</h3><p>Available earning tasks</p></div><div class="card tile" onclick="go('rewards')"><div class="icon">🎁</div><h3>Rewards</h3><p>Claim your rewards</p></div></div>`;
+}
+function taskView(){
+  return `<section class="card"><h2>🎬 Tasks</h2><p class="muted">Task complete হলে reward server থেকে যোগ হবে।</p>${tasks.length?tasks.map(t=>`<div class="task"><div><h4>${esc(t.title)}</h4><p>${esc(t.description)}</p></div><div style="text-align:right"><div class="amount">+${t.reward}</div><button class="btn" onclick="completeTask('${esc(t.id)}')">Do Task</button></div></div>`).join(""):"<div class='empty'>No tasks available</div>"}`;
+}
+function rewards(){
+  return `<section class="card"><h2>🎁 Rewards</h2><div class="label">Available balance</div><div class="amount">${Number(me.balance).toLocaleString()} points</div><button class="btn primary full" onclick="withdraw()">💰 Withdraw</button></section>`;
+}
+function referral(){
+  const telegramId=String(me.telegramId||tg?.initDataUnsafe?.user?.id||"");
+  const link=me.referralLink || (telegramId ? "https://t.me/VideoReward_Bot?startapp=ref_"+encodeURIComponent(telegramId) : "");
+  return `<section class="card">
+    <h2>👥 Referral</h2>
+    <p class="muted">বন্ধুকে invite করুন এবং তারা প্রথম one-time task সম্পন্ন করলে referral reward পান।</p>
+    <div class="stats">
+      <div class="stat"><b>${Number(me.referrals||0)}</b><span>Joined</span></div>
+      <div class="stat"><b>${Number(me.referralReward||0)}</b><span>Reward / friend</span></div>
+    </div>
+    <div class="field"><label>Your referral link</label><input id="refLink" value="${esc(link)}" readonly></div>
+    <div class="row">
+      <button class="btn primary" onclick="copyRef()">🔗 Copy Link</button>
+      <button class="btn" onclick="shareRef()">📤 Share on Telegram</button>
+    </div>
+    <div class="notice">Referral ID: <b>${esc(me.telegramId)}</b><br>Referral registration and rewards are validated by the backend.</div>
+  </section>`;
+}
+function profile(){
+  return `<section class="card"><h2>👤 Profile</h2><p><b>${esc(me.firstName||"")}</b> ${esc(me.lastName||"")}</p><p class="muted">@${esc(me.username||"not_set")}</p><p class="muted">Telegram ID: ${esc(me.telegramId)}</p></section>`;
+}
+function render(tab="home"){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+  document.getElementById("view").innerHTML=tab==="home"?home():tab==="tasks"?taskView():tab==="rewards"?rewards():tab==="referral"?referral():profile();
+}
+async function completeTask(id){
+  try{const r=await api("/api/tasks/"+id+"/complete",{method:"POST"});notify("Reward added: +"+r.reward+" points"+(r.referralReward? "\nReferral reward: +"+r.referralReward+" points":""));await loadMe();render("home")}catch(e){notify(e.message)}
+}
+async function claimDaily(){
+  try{const r=await api("/api/tasks/daily/complete",{method:"POST"});notify("Daily bonus: +"+r.reward+" points");await loadMe();render("home")}catch(e){notify(e.message)}
+}
+async function withdraw(){
+  document.getElementById("modalBody").innerHTML=`<h2>Withdraw</h2><div class="field"><label>Amount (points)</label><input id="wAmount" type="number" min="1" max="${me.balance}"></div><div class="field"><label>Account (wallet/email)</label><input id="wAccount" type="text"></div><button class="btn primary full" onclick="submitWithdraw()">Withdraw</button>`;
+  document.getElementById("modal").classList.remove("hidden");
+}
+async function submitWithdraw(){
+  try{const amount=Number(document.getElementById("wAmount").value),account=document.getElementById("wAccount").value.trim();const r=await api("/api/withdrawals",{method:"POST",body:JSON.stringify({amount,account})});notify("Withdrawal submitted: "+amount+" points to "+account);closeModal();await loadMe();render("rewards")}catch(e){notify(e.message)}
+}
+function closeModal(){document.getElementById("modal").classList.add("hidden")}
+function getReferralLink(){
+  const telegramId=String(me?.telegramId||tg?.initDataUnsafe?.user?.id||"");
+  return me?.referralLink || (telegramId ? "https://t.me/VideoReward_Bot?startapp=ref_"+encodeURIComponent(telegramId) : "");
+}
+async function copyRef(){
+  const link=getReferralLink();
+  if(!link){notify("Telegram user ID পাওয়া যায়নি");return}
+  try{await navigator.clipboard.writeText(link);notify("Referral link copied")}
+  catch{notify(link)}
+}
+function shareRef(){
+  const text="🎬 VideoReward Official-এ join করুন এবং tasks করে points earn করুন!";
+  const link=getReferralLink();
+  if(!link){notify("Telegram user ID পাওয়া যায়নি");return}
+  const shareUrl="https://t.me/share/url?url="+encodeURIComponent(link)+"&text="+encodeURIComponent(text);
+  if(tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+  else window.open(shareUrl,"_blank");
+}
+function go(tab){render(tab); if(tab==="tasks")loadTasks().then(()=>render("tasks"))}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()};
+
+(async function(){
+  try{
+    tg?.ready(); tg?.expand();
+    await login(); await loadMe(); await loadTasks(); render("home");
+  }catch(e){
+    document.getElementById("view").innerHTML=`<section class="card"><h2>Setup required</h2><p class="muted">${esc(e.message)}</p><div class="notice">Frontend → Backend HTTPS URL এবং Telegram Bot Token setup করুন।</div></section>`;
+  }
+})();
+</script>
+</body>
+</html>
